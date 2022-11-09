@@ -5,6 +5,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
@@ -25,7 +28,7 @@ import java.util.regex.Pattern;
 
 public class URL_MainActivity extends AppCompatActivity {
 
-    Button btnAdd, btnPrev, btnNext, btnClear, btnCamera;
+    Button btnAdd, btnPrev, btnNext, btnCamera;
     EditText inputURL;
     ImageView imageView;
 
@@ -49,7 +52,6 @@ public class URL_MainActivity extends AppCompatActivity {
         btnAdd = findViewById(R.id.btnAdd);
         btnPrev = findViewById(R.id.btnPrev);
         btnNext = findViewById(R.id.btnNext);
-        btnClear = findViewById(R.id.btnClear);
         btnCamera = findViewById(R.id.btnCamera);
         inputURL = findViewById(R.id.inputURL);
         imageView = findViewById(R.id.imageCamera);
@@ -65,12 +67,12 @@ public class URL_MainActivity extends AppCompatActivity {
         btnCamera.setOnClickListener(view -> startActivity(new Intent(URL_MainActivity.this, Camera_MainActivity.class)));
 
         // Clear the list
-        btnClear.setOnClickListener(v -> {
-            savedList.clear();
-            index = -1;
-            imageView.setImageResource(0);
-            saveFile(fileName, savedList);
-        });
+//        onCreateOptionsMenu(Menu menu).setOnClickListener(v -> {
+//            savedList.clear();
+//            index = -1;
+//            imageView.setImageResource(0);
+//            saveFile(fileName, savedList);
+//        });
 
         btnAdd.setOnClickListener(v -> {
             if (!inputURL.getText().toString().trim().isEmpty()) {
@@ -155,5 +157,28 @@ public class URL_MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Error reading file", Toast.LENGTH_SHORT).show();
         }
         return text;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_main, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.delete_all) {
+            savedList.clear();
+            imageView.setImageResource(0);
+            removeFile();
+            index = -1;
+            Toast.makeText(this, "Delete all images", Toast.LENGTH_SHORT).show();
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void removeFile() {
+        getApplicationContext().deleteFile(fileName);
     }
 }

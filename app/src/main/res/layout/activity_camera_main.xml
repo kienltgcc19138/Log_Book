@@ -6,30 +6,30 @@
     android:layout_height="match_parent"
     tools:context=".Camera_MainActivity">
 
+
     <Button
         android:id="@+id/btnNext"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="20dp"
         android:text="Next"
         app:layout_constraintEnd_toEndOf="@+id/imageCamera"
-        app:layout_constraintTop_toBottomOf="@+id/btnTakePhoto" />
+        app:layout_constraintTop_toBottomOf="@+id/name" />
 
     <Button
         android:id="@+id/btnPrev"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="20dp"
         android:text="PREV"
         app:layout_constraintStart_toStartOf="@+id/imageCamera"
-        app:layout_constraintTop_toBottomOf="@+id/btnTakePhoto" />
-
+        app:layout_constraintTop_toBottomOf="@+id/name" />
 
     <ImageView
         android:id="@+id/imageCamera"
         android:layout_width="400dp"
         android:layout_height="300dp"
-        android:layout_marginTop="80dp"
+        android:layout_marginTop="20dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.454"
         app:layout_constraintStart_toStartOf="parent"
@@ -39,11 +39,11 @@
         android:id="@+id/btnTakePhoto"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
+        android:layout_marginTop="20dp"
         android:text="Take Photo"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/previewView" />
+        app:layout_constraintEnd_toStartOf="@+id/btnNext"
+        app:layout_constraintStart_toEndOf="@+id/btnPrev"
+        app:layout_constraintTop_toBottomOf="@+id/name" />
 
     <androidx.camera.view.PreviewView
         android:id="@+id/previewView"
@@ -56,16 +56,28 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/label"
+        android:id="@+id/location"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="16dp"
         android:text="TextView"
         android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imageCamera" />
+
+    <TextView
+        android:id="@+id/name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="TextView"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="@+id/previewView"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="@+id/previewView"
+        app:layout_constraintTop_toBottomOf="@+id/previewView" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
