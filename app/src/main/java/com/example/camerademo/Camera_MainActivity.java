@@ -17,10 +17,13 @@ import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
@@ -36,8 +39,10 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.common.util.concurrent.ListenableFuture;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 
@@ -51,23 +56,27 @@ public class Camera_MainActivity extends AppCompatActivity {
     private int currentIndex = -1;
 
 
-    private FusedLocationProviderClient locationClient;
-    private final int REQUEST_PERMISSION_FINE_LOCATION = 1;
-    private TextView txtLocation;
+
+    FusedLocationProviderClient fusedLocationProviderClient;
+    TextView lattitude,longitude;
+
+    private final static int REQUEST_CODE = 100;
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case REQUEST_PERMISSION_FINE_LOCATION:
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Toast.makeText(Camera_MainActivity.this, "Permission Granted!", Toast.LENGTH_LONG).show();
-                    showLocation();
-                } else {
-                    Toast.makeText(Camera_MainActivity.this, "Permission Denied!", Toast.LENGTH_LONG).show();
-                    txtLocation.setText("Location permission not granted");
-                }
+
+        if (requestCode == REQUEST_CODE){
+
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                getLastLocation();
+            }else {
+                Toast.makeText(Camera_MainActivity.this,"Please provide the required permission",Toast.LENGTH_SHORT).show();
+            }
         }
+
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (allPermissionsGranted()) {
             startCamera();
@@ -78,51 +87,17 @@ public class Camera_MainActivity extends AppCompatActivity {
 
     }
 
-    @SuppressLint("MissingPermission")
-    private void showLocation() {
-        locationClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
-            @Override
-            public void onSuccess(Location location) {
-                if (location != null) {
-
-                    txtLocation.setText("Current location is:\nLat:" + location.getLatitude()
-                            + "\nLon: " + location.getLongitude());
-                }
-            }
-        });
-
-        locationClient.getLastLocation().addOnCompleteListener(this, new OnCompleteListener<Location>() {
-            @Override
-            public void onComplete(@NonNull Task<Location> task) {
-                if(task.isSuccessful()) {
-                    Location location = task.getResult();
-                    if (location != null) {
-
-                        txtLocation.setText("Current location is:\nLat:" + location.getLatitude()
-                                + "\nLon: " + location.getLongitude());
-                    }
-                    else {
-                        txtLocation.setText("Problem getting the location");
-                    }
-                }
-
-            }
-        });
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera_main);
 
-        locationClient = LocationServices.getFusedLocationProviderClient(this);
-        txtLocation = ((TextView) findViewById(R.id.location));
 
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_PERMISSION_FINE_LOCATION);
-        } else {
-            showLocation();
-        }
+        lattitude = findViewById(R.id.lattitude);
+        longitude = findViewById(R.id.longitude);
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+        getLastLocation();
 
 
 
@@ -142,8 +117,37 @@ public class Camera_MainActivity extends AppCompatActivity {
 
         btnNext.setOnClickListener(v -> {
             setAnimationLeftToRight();
+            setAnimationRightToLeft();
             setImageFromStorage();
         });
+    }
+
+    private void getLastLocation(){
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
+            fusedLocationProviderClient.getLastLocation()
+                    .addOnSuccessListener(new OnSuccessListener<Location>() {
+                        @Override
+                        public void onSuccess(Location location) {
+                            if (location != null){
+                                try {
+                                    Geocoder geocoder = new Geocoder(Camera_MainActivity.this, Locale.getDefault());
+                                    List<Address> addresses = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
+                                    lattitude.setText("Lattitude: "+addresses.get(0).getLatitude());
+                                    longitude.setText("Longitude: "+addresses.get(0).getLongitude());
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                    });
+        }else {
+            askPermission();
+        }
+    }
+
+    private void askPermission() {
+
+        ActivityCompat.requestPermissions(Camera_MainActivity.this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION},REQUEST_CODE);
     }
 
     private boolean allPermissionsGranted() {
@@ -254,6 +258,11 @@ public class Camera_MainActivity extends AppCompatActivity {
         // Animation using pre-defined android Slide Left-to-Right
         Animation in_left = AnimationUtils.loadAnimation(this, android.R.anim.slide_in_left);
         imageView.setAnimation(in_left);
+    }
+    private void setAnimationRightToLeft() {
+        // Animation using pre-defined android Slide Left-to-Right
+        Animation in_right = AnimationUtils.loadAnimation(this, android.R.anim.slide_out_right);
+        imageView.setAnimation(in_right);
     }
     Executor getExecutor() {
         return ContextCompat.getMainExecutor(this);

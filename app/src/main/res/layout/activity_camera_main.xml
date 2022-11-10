@@ -28,8 +28,8 @@
     <ImageView
         android:id="@+id/imageCamera"
         android:layout_width="400dp"
-        android:layout_height="300dp"
-        android:layout_marginTop="20dp"
+        android:layout_height="280dp"
+        android:layout_marginTop="10dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.454"
         app:layout_constraintStart_toStartOf="parent"
@@ -56,15 +56,15 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/location"
+        android:id="@+id/lattitude"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="TextView"
+        android:layout_marginTop="10dp"
+        android:text="Lattitude"
         android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/imageCamera"
         app:layout_constraintTop_toBottomOf="@+id/imageCamera" />
 
     <TextView
@@ -78,6 +78,18 @@
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="@+id/previewView"
         app:layout_constraintTop_toBottomOf="@+id/previewView" />
+
+    <TextView
+        android:id="@+id/longitude"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="Longitude"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/lattitude"
+        app:layout_constraintTop_toBottomOf="@+id/lattitude" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
