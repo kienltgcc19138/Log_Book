@@ -63,6 +63,8 @@ public class Camera_MainActivity extends AppCompatActivity {
         Button btnPrev = findViewById(R.id.btnPrev);
         imageView = findViewById(R.id.imageCamera);
         itemLabel = findViewById(R.id.name);
+
+        // Request camera permissions
         if (allPermissionsGranted()) {
             startCamera();
         } else {
@@ -70,6 +72,7 @@ public class Camera_MainActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS);
         }
 
+        // Set up the listener for take photo button
         buttonTakePhoto.setOnClickListener(v -> takePhoto());
         btnNext.setOnClickListener(v -> {
             currentIndex++;
@@ -88,6 +91,7 @@ public class Camera_MainActivity extends AppCompatActivity {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        // Check if all permission are granted
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (allPermissionsGranted()) {
             startCamera();
@@ -109,8 +113,8 @@ public class Camera_MainActivity extends AppCompatActivity {
     }
 
     public void startCamera() {
+        // Create camera provider
         ListenableFuture<ProcessCameraProvider> cameraProviderFuture = ProcessCameraProvider.getInstance(this);
-
         cameraProviderFuture.addListener(() -> {
             try {
                 // Camera provider is now guaranteed to be available
@@ -136,23 +140,27 @@ public class Camera_MainActivity extends AppCompatActivity {
     }
 
     private void takePhoto() {
+        // Get a stable reference of the modifiable image capture use case
         long timestamp = System.currentTimeMillis();
+        // Create output options object which contains file + metadata
         ContentValues contentValues = new ContentValues();
         contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, timestamp);
         contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg");
 
+        // Insert a new record into the Events data source.
         ImageCapture.OutputFileOptions outputFileOptions =
                 new ImageCapture.OutputFileOptions.Builder(getContentResolver(),
                         MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
                         contentValues).build();
+        // Setup image capture listener which is triggered after photo has
         imageCapture.takePicture(outputFileOptions, getExecutor(),
                 new ImageCapture.OnImageSavedCallback() {
                     @Override
                     public void onImageSaved(ImageCapture.OutputFileResults outputFileResults) {
-
+                        // Save image to gallery
                         List<String> imageAbsolutePaths = getImageAbsolutePaths();
                         // display recent captured photo
-                        Glide.with(Camera_MainActivity.this).load(imageAbsolutePaths.get(0))
+                        Glide.with(Camera_MainActivity.this).load(imageAbsolutePaths.get(imageAbsolutePaths.size()-1))
                                 .centerCrop()
                                 .into(imageView);
                         itemLabel.setText(outputFileResults.getSavedUri().getPath());
@@ -161,6 +169,7 @@ public class Camera_MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onError(ImageCaptureException exception) {
+                        // Error occurred while saving image
                         Toast.makeText(Camera_MainActivity.this, "Error saving photo: " + exception.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 }
@@ -168,19 +177,18 @@ public class Camera_MainActivity extends AppCompatActivity {
     }
 
     private void setImageFromStorage() {
+        // display recent captured photo
         List<String> imageAbsolutePaths = getImageAbsolutePaths();
         final int count = imageAbsolutePaths.size();
-
         if (count == 0) {
             Toast.makeText(Camera_MainActivity.this, "No photo found", Toast.LENGTH_SHORT).show();
         } else {
-
-            if (currentIndex == count) {
+            if (currentIndex >= count) {
                 currentIndex = 0;
-            }
-            if (currentIndex < 0) {
+            } else if (currentIndex < 0) {
                 currentIndex = count - 1;
             }
+
             final String imagePath = imageAbsolutePaths.get(currentIndex);
             itemLabel.setText(imagePath);
             Glide.with(this).load(imagePath)
@@ -190,11 +198,12 @@ public class Camera_MainActivity extends AppCompatActivity {
     }
 
     private List<String> getImageAbsolutePaths() {
+        // Get all images from storage
         final List<String> paths = new ArrayList();
         final Uri uri = android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
         final String[] projection = {MediaStore.MediaColumns.DATA,
                 MediaStore.Images.Media.BUCKET_DISPLAY_NAME};
-        final String orderBy = MediaStore.Images.Media.DATE_TAKEN + " DESC";
+        final String orderBy = MediaStore.Images.Media.DATE_TAKEN;
         final Cursor cursor = this.getContentResolver().query(uri, projection, null,
                 null, orderBy);
         final int column_index_data = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);

@@ -45,16 +45,24 @@ public class URL_MainActivity extends AppCompatActivity {
     private static final String FILE_NAME = "URLs.txt";
 
     // Regex pattern for URL validation
-    String regex = "(https?:\\/\\/.*\\.(?:png|jpg))"; //regex for image url
+    String regex = "https?://(?:[a-z0-9\\-]+\\.)+[a-z]{2,6}(?:/[^/#?]+)+\\.(?:png|jpg|gif|jpeg)";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_url_main);
 
-
         // retrieve all ui elements on the form
         findAllElements();
+        whenClickAdd();
+        setImage();
+        loadImage();
+        whenClickNext();
+        whenClickPrevious();
+        whenClickCamera();
+    }
+
+    private void loadImage() {
         try {
             loadURLs();
             if (imageURLs.size() > 0 && imageURLs.size() != 1) {
@@ -66,13 +74,6 @@ public class URL_MainActivity extends AppCompatActivity {
             e.printStackTrace();
             Toast.makeText(this, "Read file error, file = " + FILE_NAME, Toast.LENGTH_SHORT).show();
         }
-
-        // load URL into ImageView by using Glide
-        setImage();
-        whenClickNext();
-        whenClickPrevious();
-        whenClickAdd();
-        whenClickCamera();
     }
 
     private void whenClickCamera() {
@@ -86,25 +87,23 @@ public class URL_MainActivity extends AppCompatActivity {
             String URL = inputURL.getText().toString().trim();
             Pattern p = Pattern.compile(regex);
             Matcher m = p.matcher(URL);
-            if(URL.isEmpty()){
+            if (URL.isEmpty()) {
                 inputURL.setError("Please enter a URL");
                 inputURL.requestFocus();
-            }else{
-                if(m.matches()){
+            } else {
+                if (m.matches()) {
                     imageURLs.add(URL);
                     try {
                         saveToFile(URL);
                         Toast.makeText(this, "URL added successfully", Toast.LENGTH_SHORT).show();
-                        Glide.with(this)
-                                .load(URL)
-                                .into(imageView);
+                        Glide.with(this).load(URL).into(imageView);
                         inputURL.setText("");
                         currentIndex = imageURLs.indexOf(URL);
                     } catch (IOException e) {
                         e.printStackTrace();
                         Toast.makeText(this, "Save File Error", Toast.LENGTH_SHORT).show();
                     }
-                }else{
+                } else {
                     inputURL.setError("Please enter invalid URL");
                     inputURL.requestFocus();
                 }
@@ -137,7 +136,6 @@ public class URL_MainActivity extends AppCompatActivity {
             setImage();
         });
     }
-
 
     private void loadURLs() throws IOException {
         FileInputStream fileInputStream = getApplicationContext().openFileInput(FILE_NAME);
@@ -192,8 +190,10 @@ public class URL_MainActivity extends AppCompatActivity {
         builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
+                // Delete all images
                 if (item.getItemId() == R.id.delete_all) {
                     imageURLs.clear();
+                    // Delete all images from file
                     imageView.setImageResource(0);
                     removeFile();
                     currentIndex = 0;
